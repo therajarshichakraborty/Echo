@@ -72,7 +72,7 @@ IMPORTANT: After EVERY webSearch tool call, you MUST immediately write a short p
 
     return createUIMessageStreamResponse({
         stream: toUIMessageStream({
-            stream: result.fullStream,
+            stream: result.stream,
             originalMessages: messages,
             generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
             onEnd: async ({ messages: finalMessages }) => {
@@ -83,5 +83,11 @@ IMPORTANT: After EVERY webSearch tool call, you MUST immediately write a short p
                 }
             },
         }),
+        headers: {
+            "X-Accel-Buffering": "no",
+            "Transfer-Encoding": "chunked",
+            "Connection": "keep-alive",
+            "Content-Encoding": "none",
+        },
     });
 }
