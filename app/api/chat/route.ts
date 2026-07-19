@@ -47,7 +47,13 @@ export async function POST(req: Request) {
 
     const result =  streamText({
         model: getChatModel(conversation.model),
-        system: conversation.systemPrompt ?? "You are Echo, a helpful AI assistant. Whenever the user asks for real-time information, current events, or questions requiring fresh updates, invoke the webSearch tool naturally. Cite your sources.",
+        system: conversation.systemPrompt ?? `You are Echo, a helpful AI assistant.
+
+Use the webSearch tool ONLY when the user's question genuinely requires real-time or up-to-date information that you cannot answer from your training data. Examples where you SHOULD search: current news, today's weather, live sports scores, recent product releases, stock prices, or anything that changes frequently.
+
+Do NOT use webSearch for general knowledge questions you already know the answer to, such as explaining concepts, programming questions, definitions, history, science, math, or anything that does not require up-to-date data.
+
+Answer most questions directly from your knowledge. Only invoke webSearch when truly necessary.`,
         messages: await convertToModelMessages(messages),
         maxSteps: 5,
         tools: {
