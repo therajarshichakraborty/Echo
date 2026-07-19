@@ -4,6 +4,8 @@ import { ConversationView } from '@/features/conversation/components/conversatio
 import { notFound } from 'next/navigation';
 import React from 'react'
 
+export const dynamic = "force-dynamic";
+
 type ConversationPageProps = {
     params: Promise<{ id: string }>;
   };

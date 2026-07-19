@@ -6,6 +6,9 @@ import { auth } from "@clerk/nextjs/server";
 import { convertToModelMessages, createIdGenerator, createUIMessageStream, createUIMessageStreamResponse, streamText, toUIMessageStream, type UIMessage, tool, isStepCount } from "ai";
 import { z } from "zod";
 import { performWebSearch } from "@/features/ai/utils/search";
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 /**
  * POST /api/chat — Streams an AI assistant reply for a conversation.
  *
