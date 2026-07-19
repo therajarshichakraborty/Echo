@@ -3,6 +3,7 @@
 import { requireUser } from "@/features/auth/action/require-user";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import type { Branch, Message } from "@/lib/generated/prisma/client";
 
 export type BranchItem = {
   id: string;
@@ -113,7 +114,7 @@ export async function deleteBranch(branchId: string) {
 
   // If the deleted branch was active, fallback to another one
   if (conversation.activeBranchId === branchId) {
-    const remainingBranches = conversation.branches.filter((b) => b.id !== branchId);
+    const remainingBranches = conversation.branches.filter((b: Branch) => b.id !== branchId);
     const nextActiveId = remainingBranches[0]?.id ?? null;
 
     await prisma.conversation.update({
@@ -137,11 +138,13 @@ export async function switchSibling(conversationId: string, siblingMessageId: st
   });
 
   // Get all messages in conversation to trace paths
-  const allMessages = await prisma.message.findMany({
+  const allMessages: Message[] = await prisma.message.findMany({
     where: { conversationId },
   });
 
-  const messageMap = new Map(allMessages.map((msg) => [msg.id, msg]));
+  const messageMap = new Map<string, Message>(
+    allMessages.map((msg: Message) => [msg.id, msg])
+  );
 
   // Helper to trace from a leaf message upwards to check if it contains the target message ID
   function pathContainsMessage(leafId: string | null, targetId: string): boolean {
@@ -157,7 +160,7 @@ export async function switchSibling(conversationId: string, siblingMessageId: st
   }
 
   // Find existing branch containing this sibling message
-  let targetBranch = conversation.branches.find((b) =>
+  let targetBranch = conversation.branches.find((b: Branch) =>
     pathContainsMessage(b.leafMessageId, siblingMessageId)
   );
 
