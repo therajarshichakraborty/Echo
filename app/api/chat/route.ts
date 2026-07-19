@@ -3,7 +3,9 @@ import { getChatModel } from "@/features/ai/utils/model";
 import { requireUser } from "@/features/auth/action/require-user";
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { convertToModelMessages, createIdGenerator, createUIMessageStream, createUIMessageStreamResponse, streamText, toUIMessageStream, type UIMessage } from "ai";
+import { convertToModelMessages, createIdGenerator, createUIMessageStream, createUIMessageStreamResponse, streamText, toUIMessageStream, type UIMessage, tool } from "ai";
+import { z } from "zod";
+import { performWebSearch } from "@/features/ai/utils/search";
 /**
  * POST /api/chat — Streams an AI assistant reply for a conversation.
  *
@@ -46,8 +48,21 @@ export async function POST(req: Request) {
 
     const result =  streamText({
         model: getChatModel(conversation.model),
-        system: conversation.systemPrompt ?? "You are ChaiGpt , a helpful assistant",
+        system: conversation.systemPrompt ?? "You are Echo, a helpful AI assistant. Whenever the user asks for real-time information, current events, or questions requiring fresh updates, invoke the webSearch tool naturally. Cite your sources.",
         messages: await convertToModelMessages(messages),
+        maxSteps: 5,
+        tools: {
+            webSearch: tool({
+                description: "Search the web for real-time information or questions about current events.",
+                inputSchema: z.object({
+                    query: z.string().describe("The search query to look up on the web."),
+                }),
+                execute: async ({ query}: { query: string }) => {
+                    const results = await performWebSearch(query);
+                    return results;
+                },
+            }),
+        },
     });
 
     result.consumeStream();

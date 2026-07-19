@@ -36,10 +36,12 @@ model Conversation {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   lastMessageAt DateTime @default(now())
+  activeBranchId String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   messages Message[]
+  branches Branch[]
 
   @@index([userId, lastMessageAt(sort: Desc)])
   @@index([userId, isPinned, lastMessageAt(sort: Desc)])
@@ -58,7 +60,6 @@ enum MessageStatus {
   ERROR
 }
 
-
 model Message {
   id   String @id @default(cuid())
   conversationId String
@@ -68,11 +69,25 @@ model Message {
    parts          Json?  // 
    metadata       Json? 
 
+   parentId       String?
+   parent         Message?     @relation("MessageTree", fields: [parentId], references: [id], onDelete: Cascade)
+   children       Message[]    @relation("MessageTree")
+
    conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
    createdAt DateTime @default(now())
    updatedAt DateTime @updatedAt
 
    @@index([conversationId, createdAt(sort: Desc)])
-   
+}
+
+model Branch {
+  id             String       @id @default(cuid())
+  conversationId String
+  name           String       @default("Branch")
+  leafMessageId  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }

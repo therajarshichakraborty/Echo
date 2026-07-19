@@ -53,7 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Conversation: 'Conversation',
-  Message: 'Message'
+  Message: 'Message',
+  Branch: 'Branch'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -96,7 +97,8 @@ export const ConversationScalarFieldEnum = {
   isArchived: 'isArchived',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  lastMessageAt: 'lastMessageAt'
+  lastMessageAt: 'lastMessageAt',
+  activeBranchId: 'activeBranchId'
 } as const
 
 export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]
@@ -110,11 +112,24 @@ export const MessageScalarFieldEnum = {
   content: 'content',
   parts: 'parts',
   metadata: 'metadata',
+  parentId: 'parentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const BranchScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  name: 'name',
+  leafMessageId: 'leafMessageId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BranchScalarFieldEnum = (typeof BranchScalarFieldEnum)[keyof typeof BranchScalarFieldEnum]
 
 
 export const SortOrder = {
