@@ -3,7 +3,7 @@ import { getChatModel } from "@/features/ai/utils/model";
 import { requireUser } from "@/features/auth/action/require-user";
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { convertToModelMessages, createIdGenerator, createUIMessageStream, createUIMessageStreamResponse, streamText, toUIMessageStream, type UIMessage, tool } from "ai";
+import { convertToModelMessages, createIdGenerator, createUIMessageStream, createUIMessageStreamResponse, streamText, toUIMessageStream, type UIMessage, tool, isStepCount } from "ai";
 import { z } from "zod";
 import { performWebSearch } from "@/features/ai/utils/search";
 /**
@@ -55,7 +55,7 @@ Do NOT use webSearch for general knowledge questions you already know the answer
 
 IMPORTANT: After EVERY webSearch tool call, you MUST immediately write a short plain-text answer (2-4 sentences) summarising what you found from the results. Do not stop after the tool call. Always end with a helpful text response to the user.`,
         messages: await convertToModelMessages(messages),
-        maxSteps: 5,
+        stopWhen: isStepCount(5),
         tools: {
             webSearch: tool({
                 description: "Search the web for real-time information or questions about current events.",

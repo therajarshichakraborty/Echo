@@ -64,16 +64,18 @@ export async function loadChatMessages(
   }
 
   // 4. Trace back from the leaf message to the root
-  const messageMap = new Map(allMessages.map(msg => [msg.id, msg]));
-  const branchMessages = [];
+  const messageMap = new Map<string, typeof allMessages[number]>(
+    allMessages.map(m => [m.id, m])
+  );
+  const branchMessages: Array<typeof allMessages[number]> = [];
   let currentId: string | null = leafMessageId;
   const visited = new Set<string>(); // prevent infinite loops
 
   while (currentId && messageMap.has(currentId) && !visited.has(currentId)) {
     visited.add(currentId);
-    const msg = messageMap.get(currentId)!;
-    branchMessages.push(msg);
-    currentId = msg.parentId;
+    const messageItem = messageMap.get(currentId)!;
+    branchMessages.push(messageItem);
+    currentId = messageItem.parentId;
   }
 
   // Reverse to get oldest to newest order
