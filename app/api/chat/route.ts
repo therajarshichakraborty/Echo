@@ -14,7 +14,6 @@ import { performWebSearch } from "@/features/ai/utils/search";
  */
 export async function POST(req: Request) {
     await auth.protect();
-
     const { message, id }: { message: UIMessage, id: string } = await req.json();
 
     if (!message || !id) {

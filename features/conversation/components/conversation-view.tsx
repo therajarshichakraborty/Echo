@@ -196,7 +196,7 @@ export const ConversationView = ({ conversationId, initialMessages }: Conversati
             {messages.length === 0 ? (
                 <ChatEmpty />
             ) : (
-                <ChatMessages messages={messages} status={status} onSwitchBranch={handleSwitchBranch} setMessages={setMessages} reload={reload} conversationId={conversationId} />
+                <ChatMessages messages={messages} status={status} onSwitchBranch={handleSwitchBranch} setMessages={setMessages} sendMessage={sendMessage} conversationId={conversationId} />
             )}
 
             <ChatComposer

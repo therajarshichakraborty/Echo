@@ -27,7 +27,7 @@ type ChatMessagesProps = {
   conversationId: string;
   onSwitchBranch: (branchId: string) => Promise<void>;
   setMessages: (messages: UIMessage[]) => void;
-  reload: () => any;
+  sendMessage: (options: { text: string }) => void;
 };
 
 /**
@@ -40,7 +40,7 @@ export function ChatMessages({
   conversationId,
   onSwitchBranch,
   setMessages,
-  reload,
+  sendMessage,
 }: ChatMessagesProps) {
   const queryClient = useQueryClient();
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -51,14 +51,19 @@ export function ChatMessages({
 
   const handleSaveEdit = async (messageId: string, parentId: string | null) => {
     if (!editText.trim()) return;
+    const text = editText.trim();
     try {
       setEditingMessageId(null);
-      // Create new branch from edited message
-      const result = await createBranch(conversationId, parentId, editText);
-      // Switch active branch on client
-      await onSwitchBranch(result.branchId);
-      // Reload stream generating assistant response
-      void reload();
+      // 1. Create branch record in DB (sets it as active branch starting from parentId)
+      await createBranch(conversationId, parentId, text);
+      // 2. Truncate messages to everything up to and including the parent message
+      //    (remove the edited message and anything after it)
+      const parentIdx = parentId ? messages.findIndex(m => m.id === parentId) : -1;
+      const history = parentIdx === -1 ? [] : messages.slice(0, parentIdx + 1);
+      setMessages(history);
+      // 3. sendMessage sends the new user text → creates the user msg in DB with correct
+      //    parentId via saveChatMessages, then streams the assistant response
+      sendMessage({ text });
     } catch (error: any) {
       toast.error(error.message || "Failed to edit message and start branch");
     }

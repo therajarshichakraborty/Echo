@@ -21,11 +21,11 @@ export async function listBranches(conversationId: string): Promise<BranchItem[]
   });
 }
 
-/** Create a new branch by editing a previous message (or forking). */
+/** Create a new branch by forking at a given parent message. */
 export async function createBranch(
   conversationId: string,
   parentMessageId: string | null,
-  newContent: string
+  _newContent: string // kept in signature for compatibility; message is saved via the chat route
 ) {
   const user = await requireUser();
 
@@ -35,26 +35,14 @@ export async function createBranch(
     include: { branches: true },
   });
 
-  // Create the new user message fork
-  const newMsg = await prisma.message.create({
-    data: {
-      conversationId,
-      role: "USER",
-      content: newContent,
-      parentId: parentMessageId,
-      status: "COMPLETE",
-      parts: [{ type: "text", text: newContent }],
-    },
-  });
-
   const branchName = `Branch ${conversation.branches.length + 1}`;
 
-  // Create the branch pointing to this new message
+  // Create the branch – leafMessageId starts null; saveChatMessages will fill it
   const branch = await prisma.branch.create({
     data: {
       conversationId,
       name: branchName,
-      leafMessageId: newMsg.id,
+      leafMessageId: parentMessageId, // start from parent so history is correct
     },
   });
 
@@ -67,7 +55,7 @@ export async function createBranch(
   revalidatePath("/");
   revalidatePath(`/c/${conversationId}`);
 
-  return { branchId: branch.id, leafMessageId: newMsg.id };
+  return { branchId: branch.id };
 }
 
 /** Switch the active branch of a conversation. */
