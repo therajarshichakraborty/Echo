@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         await saveChatMessages(id, [message]);
     }
 
-    const result =  streamText({
+    const result = streamText({
         model: getChatModel(conversation.model),
         system: conversation.systemPrompt ?? `You are Echo, a helpful AI assistant.
 
@@ -53,7 +53,7 @@ Use the webSearch tool ONLY when the user's question genuinely requires real-tim
 
 Do NOT use webSearch for general knowledge questions you already know the answer to, such as explaining concepts, programming questions, definitions, history, science, math, or anything that does not require up-to-date data.
 
-Answer most questions directly from your knowledge. Only invoke webSearch when truly necessary.`,
+IMPORTANT: After EVERY webSearch tool call, you MUST immediately write a short plain-text answer (2-4 sentences) summarising what you found from the results. Do not stop after the tool call. Always end with a helpful text response to the user.`,
         messages: await convertToModelMessages(messages),
         maxSteps: 5,
         tools: {
@@ -62,7 +62,7 @@ Answer most questions directly from your knowledge. Only invoke webSearch when t
                 inputSchema: z.object({
                     query: z.string().describe("The search query to look up on the web."),
                 }),
-                execute: async ({ query}: { query: string }) => {
+                execute: async ({ query }: { query: string }) => {
                     const results = await performWebSearch(query);
                     return results;
                 },
@@ -70,21 +70,18 @@ Answer most questions directly from your knowledge. Only invoke webSearch when t
         },
     });
 
-    result.consumeStream();
-
     return createUIMessageStreamResponse({
-        stream:toUIMessageStream({
-           stream:result.stream,
-           originalMessages:messages,
-           generateMessageId:createIdGenerator({prefix:"msg" , size:16}),
-           onEnd:async({messages:finalMessages})=>{
-            try {
-                await saveChatMessages(id , finalMessages , {updateTitle:false})
-            } catch (error) {
-                console.error(error);
-            }
-           }
-        })
-    })
-
+        stream: toUIMessageStream({
+            stream: result.fullStream,
+            originalMessages: messages,
+            generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
+            onEnd: async ({ messages: finalMessages }) => {
+                try {
+                    await saveChatMessages(id, finalMessages, { updateTitle: false });
+                } catch (error) {
+                    console.error(error);
+                }
+            },
+        }),
+    });
 }
