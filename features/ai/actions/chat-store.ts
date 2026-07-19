@@ -1,7 +1,7 @@
 "use server";
 
 import { isTextUIPart, type UIMessage } from "ai";
-import type { Prisma, Message } from "@/lib/generated/prisma/client";
+import type { Prisma, Message, Branch } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/db";
 
 /** Extracts plain text from an AI SDK `UIMessage` by joining all text parts. */
@@ -50,7 +50,7 @@ export async function loadChatMessages(
   if (allMessages.length === 0) return [];
 
   // 3. Find the leaf message ID of the active branch
-  let activeBranch = conversation.branches.find(b => b.id === conversation.activeBranchId);
+  let activeBranch = conversation.branches.find((b: Branch) => b.id === conversation.activeBranchId);
   if (!activeBranch && conversation.branches.length > 0) {
     activeBranch = conversation.branches[0];
   }
