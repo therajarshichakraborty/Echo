@@ -1,13 +1,18 @@
-import { openai } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-/** Default OpenAI model used when a conversation has no model override. */
-export const DEFAULT_CHAT_MODEL = "gpt-4o-mini";
+const google = createGoogleGenerativeAI({
+    // Support both GEMINI_API_KEY and GOOGLE_GENERATIVE_AI_API_KEY env variables
+    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+});
+
+/** Default Gemini model used when a conversation has no model override. */
+export const DEFAULT_CHAT_MODEL = "gemini-2.5-flash";
 
 /**
- * Returns an OpenAI language model instance for chat completions.
+ * Returns a Gemini language model instance for chat completions.
  *
  * @param modelId - Optional model identifier; falls back to {@link DEFAULT_CHAT_MODEL}.
  */
 export function getChatModel(modelId?: string | null) {
-    return openai(modelId || DEFAULT_CHAT_MODEL)
+    return google(modelId || DEFAULT_CHAT_MODEL)
 }
