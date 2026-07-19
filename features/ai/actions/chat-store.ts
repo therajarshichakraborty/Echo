@@ -120,7 +120,7 @@ export async function saveChatMessages(
   });
 
   // 2. Ensure an active branch exists
-  let activeBranch = conversation.branches.find(b => b.id === conversation.activeBranchId);
+  let activeBranch = conversation.branches.find((b: Branch) => b.id === conversation.activeBranchId);
   if (!activeBranch) {
     if (conversation.branches.length > 0) {
       activeBranch = conversation.branches[0];
