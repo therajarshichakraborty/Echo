@@ -1,7 +1,7 @@
 "use server";
 
 import { isTextUIPart, type UIMessage } from "ai";
-import type { Prisma } from "@/lib/generated/prisma/client";
+import type { Prisma, Message } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/db";
 
 /** Extracts plain text from an AI SDK `UIMessage` by joining all text parts. */
@@ -42,7 +42,7 @@ export async function loadChatMessages(
   if (!conversation) return [];
 
   // 2. Fetch all messages in the conversation to build the tree in-memory
-  const allMessages = await prisma.message.findMany({
+  const allMessages: Message[] = await prisma.message.findMany({
     where: { conversationId },
     orderBy: { createdAt: "asc" }
   });
@@ -64,16 +64,16 @@ export async function loadChatMessages(
   }
 
   // 4. Trace back from the leaf message to the root
-  const messageMap = new Map<string, typeof allMessages[number]>(
+  const messageMap = new Map<string, Message>(
     allMessages.map(m => [m.id, m])
   );
-  const branchMessages: Array<typeof allMessages[number]> = [];
+  const branchMessages: Message[] = [];
   let currentId: string | null = leafMessageId;
   const visited = new Set<string>(); // prevent infinite loops
 
   while (currentId && messageMap.has(currentId) && !visited.has(currentId)) {
     visited.add(currentId);
-    const messageItem = messageMap.get(currentId)!;
+    const messageItem: Message = messageMap.get(currentId)!;
     branchMessages.push(messageItem);
     currentId = messageItem.parentId;
   }
