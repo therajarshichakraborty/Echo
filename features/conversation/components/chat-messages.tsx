@@ -90,8 +90,10 @@ export function ChatMessages({
   return (
     <Conversation>
       <ConversationContent className="py-8">
-        {messages.map((message) => (
-          <Message key={message.id} from={message.role}>
+        {messages.map((message) => {
+          const metadata = message.metadata as any;
+          return (
+            <Message key={message.id} from={message.role}>
             <div className="relative group/msg flex items-start gap-2 w-full max-w-[90%]">
               <MessageContent className="flex-1">
                 {editingMessageId === message.id ? (
@@ -112,7 +114,7 @@ export function ChatMessages({
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleSaveEdit(message.id, message.metadata?.parentId ?? null)}
+                        onClick={() => handleSaveEdit(message.id, metadata?.parentId ?? null)}
                         className="flex items-center gap-1 text-xs px-2.5 py-1.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/95 font-medium transition-colors"
                       >
                         <CheckIcon className="h-3 w-3" />
@@ -175,21 +177,21 @@ export function ChatMessages({
                 )}
 
                 {/* Sibling selector (inline fork navigation) */}
-                {message.metadata?.siblings && message.metadata.siblings.length > 1 && (
+                {metadata?.siblings && metadata.siblings.length > 1 && (
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2 border rounded-full px-2 py-0.5 bg-background/50 w-fit">
                     <button
                       type="button"
-                      disabled={message.metadata.siblings.indexOf(message.id) === 0 || switchingId !== null}
-                      onClick={() => handleToggleSibling(message.metadata.siblings[message.metadata.siblings.indexOf(message.id) - 1])}
+                      disabled={metadata.siblings.indexOf(message.id) === 0 || switchingId !== null}
+                      onClick={() => handleToggleSibling(metadata.siblings[metadata.siblings.indexOf(message.id) - 1])}
                       className="hover:text-foreground disabled:opacity-30 transition-opacity"
                     >
                       <ChevronLeftIcon className="h-3.5 w-3.5" />
                     </button>
-                    <span>{message.metadata.siblings.indexOf(message.id) + 1} / {message.metadata.siblings.length}</span>
+                    <span>{metadata.siblings.indexOf(message.id) + 1} / {metadata.siblings.length}</span>
                     <button
                       type="button"
-                      disabled={message.metadata.siblings.indexOf(message.id) === message.metadata.siblings.length - 1 || switchingId !== null}
-                      onClick={() => handleToggleSibling(message.metadata.siblings[message.metadata.siblings.indexOf(message.id) + 1])}
+                      disabled={metadata.siblings.indexOf(message.id) === metadata.siblings.length - 1 || switchingId !== null}
+                      onClick={() => handleToggleSibling(metadata.siblings[metadata.siblings.indexOf(message.id) + 1])}
                       className="hover:text-foreground disabled:opacity-30 transition-opacity"
                     >
                       <ChevronRightIcon className="h-3.5 w-3.5" />
@@ -216,7 +218,8 @@ export function ChatMessages({
               )}
             </div>
           </Message>
-        ))}
+          );
+        })}
 
         {isWaiting ? (
           <Message from="assistant">
