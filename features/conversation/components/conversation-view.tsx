@@ -61,7 +61,7 @@ export const ConversationView = ({ conversationId, initialMessages }: Conversati
         })
     }), []);
 
-    const { messages, sendMessage, status, setMessages, reload } = useChat({
+    const { messages, sendMessage, status, setMessages } = useChat({
         id: conversationId,
         messages: initialMessages,
         transport,
@@ -71,7 +71,7 @@ export const ConversationView = ({ conversationId, initialMessages }: Conversati
             });
             void refetchBranches();
         },
-        onError: (error) => {
+        onError: (error: Error) => {
             toast.error(error.message);
         },
     });
